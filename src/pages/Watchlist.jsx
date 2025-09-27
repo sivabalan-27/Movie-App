@@ -24,7 +24,7 @@ const watchlist = () => {
             <GenreFilter genreList={genreList} selectedGenre={setSelectedGenre} />
         </div>
 
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 mt-32"> 
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 mt-32 mx-10"> 
         {filteredMovies.map((movie) =>{ 
             return <Moviecard movie={movie} key={movie.title}/>; 
         } )}

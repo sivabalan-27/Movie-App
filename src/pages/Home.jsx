@@ -35,7 +35,7 @@ const Home = () => {
       />
 
       {/* Movie Grid */}
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 mt-32">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 mt-32 mx-10">
         {movies.length > 0 ? (
           movies.map((movie) => <Moviecard movie={movie} key={movie.id} />)
         ) : (
@@ -46,17 +46,17 @@ const Home = () => {
       </div>
 
       {/* Pagination */}
-      <div className="pagenation-container flex justify-between mt-5">
+      <div className="pagenation-container flex justify-between mt-5 mx-10">
         <button
           disabled={page === 1}
           onClick={() => setPage((prev) => prev - 1)}
-          className="p-2 bg-gray-700 text-white rounded disabled:opacity-50"
+          className="p-2 bg-gray-700 text-white rounded disabled:opacity-50 px-6 font-semibold"
         >
           PREV
         </button>
         <button
           onClick={() => setPage((prev) => prev + 1)}
-          className="p-2 bg-gray-700 text-white rounded"
+          className="p-2 bg-gray-700 text-white rounded px-6 font-semibold"
         >
           NEXT
         </button>
