@@ -6,19 +6,32 @@ const Home = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    let url = `https://api.themoviedb.org/3/movie/popular?page=${page}&api_key=9eaca748007e1684565c605a5582c903`;
+useEffect(() => {
+  const fetchMovies = async () => {
+    try {
+      let url = `https://api.themoviedb.org/3/movie/popular?page=${page}&api_key=9eaca748007e1684565c605a5582c903`;
 
-    if (search) {
-      url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(search)}&page=${page}&api_key=9eaca748007e1684565c605a5582c903`;
+      if (search) {
+        url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
+          search
+        )}&page=${page}&api_key=9eaca748007e1684565c605a5582c903`;
+      }
+
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error("API request failed");
+      }
+
+      const data = await res.json();
+      setMovies(data.results || []);
+    } catch (error) {
+      console.error("Fetch error:", error);
     }
+  };
 
-    // Fetch movies
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => setMovies(data.results || []))
-      .catch((err) => console.error("Fetch error:", err));
-  }, [page, search]);
+  fetchMovies();
+}, [page, search]);
 
   return (
     <div>
