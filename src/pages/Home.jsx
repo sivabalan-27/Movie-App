@@ -26,7 +26,9 @@ const Home = () => {
       setError("");
 
       try {
-        let url = `https://api.themoviedb.org/3/movie/popular?page=${page}&api_key=${API_KEY}`;
+        const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+  `https://api.themoviedb.org/3/movie/popular?page=${page}&api_key=${API_KEY}`
+)}`;
 
         if (debouncedSearch) {
           url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
