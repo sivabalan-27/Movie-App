@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Moviecard from "../components/Moviecard";
 
-const API_KEY = "9eaca748007e1684565c605a5582c903";
+// 🔥 Use your OMDb API key here
+const API_KEY = "892a3561";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -11,7 +12,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔥 Debounce (prevents too many API calls)
+  // 🔥 Debounce
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
@@ -26,26 +27,23 @@ const Home = () => {
       setError("");
 
       try {
-        const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-  `https://api.themoviedb.org/3/movie/popular?page=${page}&api_key=${API_KEY}`
-)}`;
+        const query = debouncedSearch || "avengers";
 
-        if (debouncedSearch) {
-          url = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(
-            debouncedSearch
-          )}&page=${page}&api_key=${API_KEY}`;
-        }
+        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(
+          query
+        )}&page=${page}`;
 
         const res = await fetch(url);
-
-        if (!res.ok) {
-          throw new Error("Failed to fetch movies");
-        }
-
         const data = await res.json();
-        setMovies(data.results || []);
+
+        if (data.Response === "False") {
+          setMovies([]);
+          setError(data.Error || "No movies found");
+        } else {
+          setMovies(data.Search || []);
+        }
       } catch (err) {
-        setError("Something went wrong. Please try again.");
+        setError("Something went wrong. Please check your connection.");
       } finally {
         setLoading(false);
       }
@@ -74,7 +72,7 @@ const Home = () => {
       )}
 
       {/* Error */}
-      {error && (
+      {error && !loading && (
         <p className="text-red-500 text-center mt-32">{error}</p>
       )}
 
@@ -83,7 +81,7 @@ const Home = () => {
         <div className="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 mt-32 mx-10">
           {movies.length > 0 ? (
             movies.map((movie) => (
-              <Moviecard movie={movie} key={movie.id} />
+              <Moviecard movie={movie} key={movie.imdbID} />
             ))
           ) : (
             <p className="text-white col-span-full text-center mt-10">
