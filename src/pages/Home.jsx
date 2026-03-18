@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Moviecard from "../components/Moviecard";
 
-// 🔥 Use your OMDb API key here
-const API_KEY = "892a3561";
+const API_KEY = "892a3561"; // OMDb API key
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -12,15 +11,16 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔥 Debounce
+  // 🔥 Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch(search);
+      setDebouncedSearch(search.trim());
     }, 500);
 
     return () => clearTimeout(timer);
   }, [search]);
 
+  // 🔥 Fetch Movies
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
@@ -29,21 +29,27 @@ const Home = () => {
       try {
         const query = debouncedSearch || "avengers";
 
-        const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(
-          query
-        )}&page=${page}`;
+        const res = await fetch(
+          `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(
+            query
+          )}&page=${page}`
+        );
 
-        const res = await fetch(url);
         const data = await res.json();
 
         if (data.Response === "False") {
           setMovies([]);
           setError(data.Error || "No movies found");
         } else {
-          setMovies(data.Search || []);
+          // 🔥 Remove duplicates (optional improvement)
+          const uniqueMovies = Array.from(
+            new Map(data.Search.map((m) => [m.imdbID, m])).values()
+          );
+
+          setMovies(uniqueMovies);
         }
       } catch (err) {
-        setError("Something went wrong. Please check your connection.");
+        setError("Network error. Please try again.");
       } finally {
         setLoading(false);
       }
@@ -53,8 +59,9 @@ const Home = () => {
   }, [page, debouncedSearch]);
 
   return (
-    <div>
-      {/* Search */}
+    <div className="min-h-screen bg-black">
+      
+      {/* 🔍 Search */}
       <input
         type="text"
         placeholder="Search Movies..."
@@ -63,25 +70,35 @@ const Home = () => {
           setSearch(e.target.value);
           setPage(1);
         }}
-        className="p-2 w-3/4 md:w-1/2 border rounded border-gray-700 bg-gray-900 bg-opacity-60 backdrop-blur-md text-white fixed top-16 left-1/2 transform -translate-x-1/2 z-10"
+        className="p-3 w-3/4 md:w-1/2 border rounded border-gray-700 bg-gray-900/70 backdrop-blur-md text-white fixed top-16 left-1/2 -translate-x-1/2 z-10 outline-none"
       />
 
-      {/* Loading */}
+      {/* ⏳ Loading */}
       {loading && (
-        <p className="text-white text-center mt-32">Loading movies...</p>
+        <p className="text-white text-center mt-32 text-lg">
+          Loading movies...
+        </p>
       )}
 
-      {/* Error */}
+      {/* ❌ Error */}
       {error && !loading && (
-        <p className="text-red-500 text-center mt-32">{error}</p>
+        <div className="text-center mt-32">
+          <p className="text-red-500 text-lg">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-600 rounded text-white"
+          >
+            Retry
+          </button>
+        </div>
       )}
 
-      {/* Movies */}
+      {/* 🎬 Movies */}
       {!loading && !error && (
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-4 mt-32 mx-10">
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-32 px-6">
           {movies.length > 0 ? (
             movies.map((movie) => (
-              <Moviecard movie={movie} key={movie.imdbID} />
+              <Moviecard key={movie.imdbID} movie={movie} />
             ))
           ) : (
             <p className="text-white col-span-full text-center mt-10">
@@ -91,18 +108,21 @@ const Home = () => {
         </div>
       )}
 
-      {/* Pagination */}
-      <div className="flex justify-between mt-5 mx-10">
+      {/* 🔄 Pagination */}
+      <div className="flex justify-between mt-8 px-6 pb-10">
         <button
           disabled={page === 1}
           onClick={() => setPage((prev) => prev - 1)}
-          className="p-2 bg-gray-700 text-white rounded disabled:opacity-50 px-6 font-semibold"
+          className="px-6 py-2 bg-gray-700 text-white rounded disabled:opacity-50"
         >
           PREV
         </button>
+
+        <span className="text-white self-center">Page {page}</span>
+
         <button
           onClick={() => setPage((prev) => prev + 1)}
-          className="p-2 bg-gray-700 text-white rounded px-6 font-semibold"
+          className="px-6 py-2 bg-gray-700 text-white rounded"
         >
           NEXT
         </button>
