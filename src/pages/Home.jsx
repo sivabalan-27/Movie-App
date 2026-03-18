@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Moviecard from "../components/Moviecard";
 
-const API_KEY = "892a3561"; // OMDb API key
+const API_KEY = "892a3561";
 
 const Home = () => {
   const [movies, setMovies] = useState([]);
@@ -11,7 +11,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔥 Debounce search input
+  // 🔥 Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search.trim());
@@ -20,7 +20,7 @@ const Home = () => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // 🔥 Fetch Movies
+  // 🔥 Fetch movies (OMDb)
   useEffect(() => {
     const fetchMovies = async () => {
       setLoading(true);
@@ -41,12 +41,7 @@ const Home = () => {
           setMovies([]);
           setError(data.Error || "No movies found");
         } else {
-          // 🔥 Remove duplicates (optional improvement)
-          const uniqueMovies = Array.from(
-            new Map(data.Search.map((m) => [m.imdbID, m])).values()
-          );
-
-          setMovies(uniqueMovies);
+          setMovies(data.Search || []);
         }
       } catch (err) {
         setError("Network error. Please try again.");
@@ -57,6 +52,11 @@ const Home = () => {
 
     fetchMovies();
   }, [page, debouncedSearch]);
+
+  // 🔥 SAFE FILTER (no crash)
+  const filteredMovies = movies.filter((movie) =>
+    (movie?.Title || "").toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-black">
@@ -96,8 +96,8 @@ const Home = () => {
       {/* 🎬 Movies */}
       {!loading && !error && (
         <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-32 px-6">
-          {movies.length > 0 ? (
-            movies.map((movie) => (
+          {filteredMovies.length > 0 ? (
+            filteredMovies.map((movie) => (
               <Moviecard key={movie.imdbID} movie={movie} />
             ))
           ) : (
